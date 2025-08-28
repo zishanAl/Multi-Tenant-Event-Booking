@@ -3,12 +3,14 @@ import type { CustomUser } from '../types/custom'
 
 type CustomReq = PayloadRequest & { user?: CustomUser }
 
-// Normalize tenant ID
 export const getTenantId = (req: CustomReq): string | undefined => {
   const t = req?.user?.tenant
   if (!t) return undefined
   if (typeof t === 'string') return t
-  if (typeof t === 'object') return t.id || t._id || t.value || undefined
+  if (typeof t === 'object') {
+    const obj = t as any
+    return obj.id || obj._id || obj.value || undefined
+  }
   return undefined
 }
 
@@ -29,7 +31,9 @@ export const setTenantField = (
   req: CustomReq
 ): Record<string, any> => {
   const id = getTenantId(req) || data?.tenant
-  const finalId =
-    typeof id === 'object' ? id?.id || id?._id : id
-  return { ...data, tenant: finalId }
+  if (typeof id === 'object') {
+    const obj = id as any
+    return { ...data, tenant: obj.id || obj._id || obj.value }
+  }
+  return { ...data, tenant: id }
 }

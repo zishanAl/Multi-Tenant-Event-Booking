@@ -5,7 +5,10 @@ const getTenantId = (req: PayloadRequest & { user?: CustomUser }) => {
   const t = req?.user?.tenant
   if (!t) return undefined
   if (typeof t === 'string') return t
-  if (typeof t === 'object') return t.id || t._id || t.value || undefined
+  if (typeof t === 'object') {
+    const obj = t as any
+    return obj.id || obj._id || obj.value || undefined
+  }
   return undefined
 }
 

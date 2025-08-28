@@ -1,12 +1,15 @@
 import type { PayloadHandler } from 'payload'
 import type { CustomUser } from '../types/custom'
 
-// helper: normalize an ID from mixed values
-const idOf = (v: any): string => {
+
+const idOf = (v: unknown): string => {
   if (!v) return ''
   if (typeof v === 'string') return v
   if (Array.isArray(v)) return v.length ? idOf(v[0]) : ''
-  if (typeof v === 'object') return v.id || v._id || ''
+  if (typeof v === 'object') {
+    const obj = v as any
+    return obj.id || obj._id || obj.value || ''
+  }
   return String(v)
 }
 
