@@ -1,6 +1,6 @@
-import type { User as BaseUser } from '../payload-types'
+import type { User as BaseUser, Tenant } from '../payload-types'
 
 export interface CustomUser extends BaseUser {
-  role?: 'admin' | 'organizer' | 'attendee'
-  tenant?: string | { id?: string; _id?: string; value?: string }
+  role: 'admin' | 'organizer' | 'attendee'   
+  tenant: string | Tenant                    
 }

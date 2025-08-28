@@ -2,5 +2,5 @@
 import 'payload'
 
 declare module 'payload' {
-  export type CollectionSlug = 'users' | 'media' | 'tenants'
+  export type CollectionSlug = 'users' | 'tenants' | 'events'| 'bookings'| 'notifications'| 'booking-logs'
 }
