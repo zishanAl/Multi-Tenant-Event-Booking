@@ -1,67 +1,128 @@
-# Payload Blank Template
+# Payload Booking System
 
-This template comes configured with the bare minimum to get started on anything you need.
+A multi-tenant event booking system built with Payload CMS. This system supports event capacity enforcement, waitlisting, automated promotion, in-app notifications, activity logging, and a complete organizer dashboard.
 
-## Quick start
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+### Setup Instructions
 
-## Quick Start - local setup
+**Prerequisites**
 
-To spin up this template locally, follow these steps:
+- Node.js (v18 or higher)
+- MongoDB (local or cloud)
+- Yarn (preferred) or npm
 
-### Clone
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### Step-by-Step Installation
 
-### Development
+1. Clone the Repository
+```bash
+git clone https://github.com/zishanAl/Multi-Tenant
+cd multi-tenant-event-booking
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URI` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+```
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+### Install Dependencies
+```bash
+yarn install
+# or
+npm install
+```
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+### Configure Environment Variables
 
-#### Docker (Optional)
+- Create a .env file based on .env.example and set the following:
+```bash
+PAYLOAD_SECRET=your_secret_key
+MONGODB_URI=mongodb://localhost:27017/payload-booking
+```
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+### Run the Development Server
+```bash
+yarn dev
+# or
+npm run dev
+```
 
-To do so, follow these steps:
+### Access Admin Dashboard
+Open http://localhost:3000/admin
 
-- Modify the `MONGODB_URI` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URI` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
 
-## How it works
+## Architecture Overview
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+**Folder Structure**
+```bash
+src/
+│
+├── access/              # Multi-tenant logic and roles
+├── app/                 # Next.js routing
+│
+├── collections/         # Payload collections
+│   ├── Bookings.ts
+│   ├── Events.ts
+│   ├── Notifications.ts
+│   ├── BookingLogs.ts
+|   ├── Tenants.ts
+│   └── Users.ts
+│
+├── endpoints/       # Custom endpoints      
+│   ├── bookEvent.ts
+│   ├── cancelBooking.ts
+│   ├── dashboard.ts
+│   ├── markNotificationread.ts
+|   ├── myBookings.ts
+│   └── myNotifications.ts        
+│
+└── payload.config.js    # configuration of application
 
-### Collections
+```
+### Plugin/Hook Logic
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+- beforeChange on Bookings handles tenant enforcement and capacity checks.
+- afterChange on Bookings triggers side effects like notification creation, waitlist promotion, and activity logging.
 
-- #### Users (Authentication)
+### Sample Workflows
 
-  Users are auth-enabled collections that have access to the admin panel.
+**1. Booking with Capacity Enforcement**
+- A user books an event.
+- If capacity is available → status: confirmed
+- If full → status: waiting
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
 
-- #### Media
+**2. Automatic Promotion**
+- If a confirmed booking is cancelled, the oldest waitlisted user is promoted to confirmed.
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+**3. Notifications & Logs**
+- Each booking action generates a Notification and a BookingLog entry (e.g., booking_confirmed, waiting, canceled, promote_from_waitlist).
 
-### Docker
+**4. Organizer Dashboard**
+- Shows:
+- Upcoming events
+- Status-wise event summaries
+- Booking percentage filled
+- Recent activity logs
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+### Demo Credentials
+```bash
+Role	Email	Password
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+Admin	    admin@example.com	    admin123
+organiser	organiser@example.com	review123
+user        user@example.com        user123
+```
+> You can update/add users via Payload Admin UI under the Users collection.
 
-## Questions
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+### Deployment Guide
+
+Deploying on Vercel
+1. Push your code to GitHub.
+2. Go to https://vercel.com and import the repository.
+3. Set Environment Variables in the Vercel Dashboard:
+```bash
+PAYLOAD_SECRET=your_secret
+MONGODB_URI=your_mongodb_connection_string
+```
+4. Choose yarn build or npm run build as the build command and .output as the output directory if using a custom Next.js config.
+
+5. Deploy!
